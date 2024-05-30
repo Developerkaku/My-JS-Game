@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            padding: 0;
+            border: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* body {
+            height: 100vh;
+        } */
+
+        #startScreen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            width: 25vw;
+            height: 10vh;
+            background-color: rgb(60, 215, 60);
+            border: .15em solid black;
+            border-radius: 20px;
+            /* color: RED; */
+            font-size: 2rem;
+        }
+
+        #player {
+            background-color: red;
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            transform: translateX(10px);
+        }
+
+        .bullet {
+            position: absolute;
+            left: 0;
+            background-color: black;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+
+        .enemy {
+            position: absolute;
+            top: 0;
+            background-color: black;
+            width: 100px;
+            height: 100px;
+        }
+
+        #stage {
+
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+
+            border-bottom: 105px solid aqua;
+        }
+
+        #endScreen{
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container{
+            width: 40vw;
+            height: 80vh;
+            border-radius: 50px;
+            background-color: red;
+            border: .25em solid black;
+        }
+
+        #score{
+            width:100%;
+            font-size: 2em;
+        }
+
+        /* .B2{
+            translate: 15vw 59vh;
+        } */
+
+        table, tr{
+            width: 100%;
+        }
+        td{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 26vh */
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="startScreen">
+        <div class="container" style="translate: -50%;"> 
+            <table>
+                <tr>
+                    <td style="height: 35vh">
+                        <button onclick="document.getElementById('gameArea').style.display = 'block'; start();"> 
+                            PLAY 
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="height: 10vh">
+                        <button>Difficulty : <input type="range"> </button>
+                    </td>     
+                </tr>
+                <tr>
+                    <td style="height: 35vh">
+                        <button onclick=""> Instructions </button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div id="gameArea" style=" display:none;">
+        <div id="player"></div>
+        <div id="stage"></div>
+        <p id="display"></p>
+    </div>
+
+    <div id="endScreen">
+        <div class="container">
+            <table>
+                <tr>
+                    <td style="height: 26vh; justify-content:left; padding: 0 0 0 6vw;">
+                        <div id="score">..</div>
+                    </td>
+                    <td style="height: 15vh">
+                        <button onclick="document.getElementById('gameArea').style.display = 'block'; start();"> PLAY AGAIN</button>
+                    </td>
+                    <td style="height: 15vh">
+                        <button id="mainMenu" onclick="document.getElementById('startScreen').style.display = 'flex'; document.getElementById('endScreen').style.display = 'none';"> Main Menu</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- <button onclick="document.getElementById('gameArea').style.display = 'block'; a(); ">qqqqqqqq</button> -->
+    <script>
+        function start() {
+
+        alert(" ATTENTION ! \n Use W,A,S,D keys to move \n Use J key to fire\n HAVE FUN !!");
+
+            // INITIALISING VARIABLES FOR ANOTHER GAME
+
+            leftBound = 10;
+            key = null;
+            lastKey = null;
+            ac = 1;
+            speed = {
+                x: 3,
+                y: 0,
+            };
+
+            gravity = 0;
+            velocity = 8;
+            posX = 0, posY = 0;
+
+            keyPressed = {
+                w: false,
+                a: false,
+                s: false,
+                d: false,
+                j: false,
+                e: false
+            };
+
+            bullets = Array();
+            enemies = Array();
+            gap = 0;
+            time = 0;
+            startFight = false;
+
+            score = 0;
+
+            document.getElementById("startScreen").style.display = 'none';
+            document.getElementById("endScreen").style.display = 'none';
+            
+            a();
+        }
+
+        var frameVar;
+        var score = 0;
+
+        var stage = document.getElementById("stage");
+        var player = document.getElementById("player");
+
+        var leftBound = 10;
+        var key = null;
+        var lastKey = null;
+        var ac = 1;
+
+        var speed = {
+            x: 3,
+            y: 0,
+        };
+
+        var gravity = 0;
+        var velocity = 8;
+        var posX = 0, posY = 0;
+
+        var keyPressed = {
+            w: false,
+            a: false,
+            s: false,
+            d: false,
+            j: false,
+            e: false
+        };
+
+        var bullets = Array();
+        var enemies = Array();
+        var gap = 0;
+        var time = 0;
+        var startFight = false;
+
+        var sReleased;
+
+        window.addEventListener("keydown", (e) => {
+            player.innerHTML = e.key;
+            switch (e.key) {
+                case 'a':
+                    keyPressed.a = true;
+                    break;
+                case 'd':
+                    keyPressed.d = true;
+                    break;
+                case 'w':
+                    keyPressed.w = true;
+                    break;
+                case 's':
+                    keyPressed.s = true;
+                    break;
+                case 'j':
+                    keyPressed.j = true;
+                    break;
+
+                case 'e':
+                    keyPressed.e = true;
+                    break;
+            }
+        });
+        window.addEventListener("keyup", (e) => {
+            lastKey = e.key;
+            switch (e.key) {
+                case 'a':
+                    keyPressed.a = false;
+                    break;
+                case 'd':
+                    keyPressed.d = false;
+                    break;
+                case 'w':
+
+                    break;
+                case 's':
+                    keyPressed.s = false;
+                    break;
+            }
+        });
+
+        function fire(x, y) {
+
+            for (var i = 0; i < bullets.length; i++) {
+                if (bullets[i] == null) { break; }
+            }
+            if (i >= 5) { return; }
+            let bullet = document.createElement("div");
+            bullet.className = "bullet";
+            bullets[i] = bullet.id = "B" + i;
+            bullet.style.left = x + player.offsetWidth + "px";
+            bullet.style.top = y + (player.offsetHeight / 2) - (15 / 2) + "px";
+
+            document.body.appendChild(bullet);
+        }
+
+        function cool(element, iterator, type, giveScore = false) {
+            (type == 'b') ? bullets[iterator] = null : enemies[iterator] = null;
+            if(type == 'e' && giveScore){ score += 1;}
+            // (type === 'b')? bullets.splice(iterator, 1) : enemies.splice(iterator, 1);
+            element.remove();
+        }
+
+        function enemy() {
+
+            for (var j = 0; j < enemies.length; j++) {
+                if (enemies[j] == null) { break; }
+            }
+
+            let enemy = document.createElement("div");
+            enemies[j] = enemy.id = "E" + j;
+            enemy.className = "enemy";
+
+            let height = Math.round(50 + Math.random() * 50);
+            let top = Math.round(Math.random());
+
+            enemy.style.left = "100vw";
+            enemy.style.height = height + "px";
+            enemy.style.top = window.innerHeight - height - 105 - 90 * top + "px";
+
+            document.body.appendChild(enemy);
+        }
+
+        function hit() {
+            //alert("ochchindi !!");
+            // if(type === 'bullet'){
+            //     let bullet = document.getElementById(element);
+            //     for(let it = 0; it < enemies.length; it++){
+            //         if(enemies[it] == null){ continue; }
+
+            //         // alert( type +" " + bullet.offsetLeft+" "+ bullet.offsetWidth+" " + document.getElementById(enemies[it]).offsetLeft +" "+ enemies[it] +" "+ bullet.style.left+" " + document.getElementById(enemies[it]).style.left+" "+window.innerWidth);
+            //         if( (bullet.offsetLeft+bullet.offsetWidth) >= window.innerWidth+document.getElementById(enemies[it]).offsetLeft){
+            //             return true;
+            //         }
+
+            //     }
+            // } else if(type === 'enemy'){
+            //     let enemy = document.getElementById(element);
+            //     for(let it = 0; it < bullets.length; it++){
+            //         if(bullets[it] == null){ continue; }
+
+            //         let bullet = document.getElementById(bullets[it]);
+            //         if(( window.innerWidth+enemy.offsetleft )<=(bullet.offsetLeft+bullet.offsetWidth)){
+            //             return true;
+            //         }
+            //     }
+            // }
+            // return false;
+
+            for (let i1 = 0; i1 < bullets.length; i1++) {
+
+
+                for (let i2 = 0; i2 < enemies.length; i2++) {
+                    if (enemies[i2] == null || bullets[i1] == null) { continue; }
+
+                    let bullet = document.getElementById(bullets[i1]);
+                    let enemy = document.getElementById(enemies[i2]);
+
+                    let bulletRB = bullet.offsetLeft + bullet.offsetWidth;
+                    let bulletLB = bullet.offsetLeft;
+                    let enemyLB = enemy.offsetLeft;
+                    let enemyRB = enemyLB + enemy.offsetWidth;
+
+                    let bulletURB = bullet.offsetTop;
+                    let bulletLRB = bulletURB + bullet.offsetWidth;
+                    let enemyURB = enemy.offsetTop;
+                    let enemyLRB = enemyURB + enemy.offsetWidth;
+
+                    if ((bulletRB >= enemyLB) && (bulletLB <= enemyRB) && (bulletURB <= enemyLRB) && (bulletLRB >= enemyURB)) {
+                        cool(bullet, i1, 'b', true);
+                        cool(enemy, i2, 'e', true);
+                    }
+                }
+            }
+        }
+
+        function gameOver() {
+            for (let i = 0; i < enemies.length; i++) {
+                if (enemies[i] == null) { continue; }
+                let enemy = document.getElementById(enemies[i]);
+
+                let enemyLB = enemy.offsetLeft;
+                let enemyRB = enemyLB + enemy.offsetWidth;
+                let enemyURB = enemy.offsetTop;
+                let enemyLRB = enemyURB + enemy.offsetWidth;
+
+                let playerLB = player.offsetLeft;
+                let playerRB = playerLB + player.offsetWidth;
+                let playerURB = player.offsetTop;
+                let playerLRB = playerURB + player.offsetWidth;
+
+                if ((
+                        ((enemyLB <= playerRB) && (enemyLB >= playerLB))
+                    ||          // collision of the left and right bounds 
+                        ((enemyRB <= playerRB) && (enemyRB >= playerLB))
+                    )
+                    &&
+                    (
+                        ((enemyURB <= playerLRB) && (enemyURB >= playerURB))
+                    ||          // collision of upper and lower bounds
+                        ((enemyLRB <= playerLRB) && (enemyLRB >= playerURB))
+                    )) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function remove_BnE() {
+            for (let iterator = 0; iterator < bullets.length; iterator++) {
+                if (bullets[iterator] == null) { continue; }
+                document.getElementById(bullets[iterator]).remove();
+            }
+            bullets = Array();
+
+            for (let iterator = 0; iterator < enemies.length; iterator++) {
+                if (enemies[iterator] == null) { continue; }
+                document.getElementById(enemies[iterator]).remove();
+            }
+            enemies = Array();
+        }
+
+        function a() {
+
+            //  CODE -> PLAYER 
+
+            var lowerBound = window.innerHeight - player.offsetHeight - 105;
+
+            var rightBound = window.innerWidth - player.offsetWidth - 20;
+
+            if (keyPressed.d && posX <= rightBound) { posX += speed.x; }
+            else if (keyPressed.a && posX >= leftBound) { posX -= speed.x; }
+
+            if (keyPressed.w) { posY -= Math.round(speed.y); speed.y -= .4; }
+            else if (posY <= lowerBound) { posY += Math.round(speed.y); speed.y += .2; }
+            else { speed.y = 10; startFight = true; }
+
+            if (posY >= lowerBound) { keyPressed.w = false; }
+
+            //             if(keyPressed.s){ 
+            // sReleased = true; 
+            //                 player.style.height = "50px"; 
+            //                 if(!keyPressed.w){ posY = 490; }
+            //                 // player.style.translate = "0 490px";
+            //                 // alert( window.innerHeight - 105 + " " +player.style.bottom);
+            //             } else if(sReleased){
+            //                 sReleased = false;
+            //                 player.style.height = "100px";
+            //                 if(!keyPressed.w){ posY = 435; }
+            //             }
+
+            player.style.left = posX + "px";
+            player.style.top = posY + "px";
+            // player.style.translate = posX + "px " + posY + "px";
+
+
+            // CODE -> ENEMIES
+
+            if (startFight) {
+                if (gap == time) {
+                    enemy();
+                    time = Math.round(50 + Math.random() * (100 - 50));
+                    gap = 0;
+                }
+                gap++;
+            }
+
+            for (let iterator = 0; iterator < enemies.length; iterator++) {
+                if (enemies[iterator] == null) { continue; }
+                let enemy = document.getElementById(enemies[iterator]);
+
+                if (enemy.offsetLeft + enemy.offsetWidth <= 0 || hit()) { cool(enemy, iterator, 'e'); }
+
+                enemy.style.left = enemy.offsetLeft - 3 + "px";
+            }
+
+
+            // CODE -> BULLETS
+
+            if (keyPressed.j) {
+                fire(posX, posY);
+                keyPressed.j = false;
+            }
+            for (let iterator = 0; iterator < bullets.length; iterator++) {
+
+                if (bullets[iterator] == null) { continue; }
+
+                let bullet = document.getElementById(bullets[iterator]);
+
+                if (bullet.offsetLeft >= window.innerWidth || hit()) { cool(bullet, iterator, 'b'); }
+
+                // alert(z+" "+bullet.style.translate);
+                // bullet.style.transform = "translateX(" + bullet.offsetLeft + 1 + "px)";
+                bullet.style.left = bullet.offsetLeft + 5 + "px";
+            }
+
+            // document.getElementById("display").innerHTML = keyPressed.w + " " + ac++ + "Y:" + posY + " LB:" + lowerBound + " G:" + gravity + " X:" + posX + " RB:" + rightBound + "<br>" + enemies + " <br>" + bullets + " hei" + player.offsetHeight + " " + player.style.height;
+
+            if (!gameOver()) {
+                frameVar = requestAnimationFrame(a);
+            } else {
+                remove_BnE();
+                document.getElementById("gameArea").style.display = 'none';
+                
+                document.getElementById("endScreen").style.display = 'flex';
+                alert("GAME OVER !!!");
+                document.getElementById("score").innerHTML = "Your score is : " + score;
+                // document.getElementById("startScreen").style.display = 'flex';
+
+                console.log(cancelAnimationFrame(frameVar));
+            }
+        }
+
+    </script>
+</body>
+
+</html>
